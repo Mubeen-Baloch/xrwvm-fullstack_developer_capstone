@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import "./Register.css";
 import user_icon from "../assets/person.png";
 import email_icon from "../assets/email.png";
@@ -11,13 +12,12 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setlastName] = useState("");
-  // Redirect to home
-  const gohome = () => {
-    window.location.href = window.location.origin;
-  };
+  const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
   // Handle form submission
   const register = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
     let register_url = window.location.origin + "/djangoapp/register";
     // Send POST request to register endpoint
     const res = await fetch(register_url, {
@@ -35,12 +35,13 @@ const Register = () => {
     });
     const json = await res.json();
     if (json.status) {
-      // Save username in session and reload home
+      // Save username in session and reload dealers
       sessionStorage.setItem("username", json.userName);
-      window.location.href = window.location.origin;
+      navigate('/dealers');
     } else if (json.error === "Already Registered") {
-      alert("The user with same username is already registered");
-      window.location.href = window.location.origin;
+      setErrorMsg("The user with same username is already registered");
+    } else {
+      setErrorMsg("Registration failed. Please try again.");
     }
   };
   return (
@@ -55,9 +56,9 @@ const Register = () => {
         <div
           style={{ display: "flex", flexDirection: "row", justifySelf: "end", alignSelf: "start" }}
         >
-          <a href="/" onClick={() => { gohome(); }} style={{ justifyContent: "space-between", alignItems: "flex-end" }}>
+          <button style={{ background: 'none', border: 'none', padding: 0 }} onClick={() => navigate('/dealers')}>
             <img style={{ width: "1cm" }} src={close_icon} alt="X" />
-          </a>
+          </button>
         </div>
         <hr />
       </div>
@@ -84,6 +85,7 @@ const Register = () => {
             <input name="psw" type="password" placeholder="Password" className="input_field" onChange={(e) => setPassword(e.target.value)} />
           </div>
         </div>
+        {errorMsg && <div style={{color: 'red', marginBottom: '10px'}}>{errorMsg}</div>}
         <div className="submit_panel">
           <input className="submit" type="submit" value="Register" />
         </div>
