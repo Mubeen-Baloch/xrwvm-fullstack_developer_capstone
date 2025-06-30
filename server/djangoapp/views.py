@@ -60,12 +60,18 @@ def registration(request):
         # Check if user already exists
         User.objects.get(username=username)
         username_exist = True
-    except:
+    except Exception as e:
         logger.debug(f"{username} is new user")
     # If it is a new user
     if not username_exist:
         # Create user in auth_user table
-        user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, password=password, email=email)
+        user = User.objects.create_user(
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            password=password,
+            email=email
+        )
         # Login the user and redirect to list page
         login(request, user)
         data = {"userName": username, "status": "Authenticated"}
@@ -91,7 +97,7 @@ def get_dealer_reviews(request, dealer_id):
         for review_detail in reviews:
             sentiment = analyze_review_sentiments(review_detail['review'])
             # If sentiment is None or doesn't have 'sentiment', default to 'neutral'
-            if sentiment and 'sentiment' in sentiment:
+            if sentiment is not None and 'sentiment' in sentiment:
                 review_detail['sentiment'] = sentiment['sentiment']
             else:
                 review_detail['sentiment'] = 'neutral'
@@ -122,10 +128,13 @@ def add_review(request):
 def get_cars(request):
     count = CarMake.objects.filter().count()
     print(count)
-    if(count == 0):
+    if count == 0:
         initiate()
     car_models = CarModel.objects.select_related('car_make')
     cars = []
     for car_model in car_models:
-        cars.append({"CarModel": car_model.name, "CarMake": car_model.car_make.name})
-    return JsonResponse({"CarModels":cars})
+        cars.append({
+            "CarModel": car_model.name,
+            "CarMake": car_model.car_make.name
+        })
+    return JsonResponse({"CarModels": cars})
