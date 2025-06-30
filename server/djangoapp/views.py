@@ -90,7 +90,11 @@ def get_dealer_reviews(request, dealer_id):
         reviews = get_request(endpoint)
         for review_detail in reviews:
             sentiment = analyze_review_sentiments(review_detail['review'])
-            review_detail['sentiment'] = sentiment['sentiment']
+            # If sentiment is None or doesn't have 'sentiment', default to 'neutral'
+            if sentiment and 'sentiment' in sentiment:
+                review_detail['sentiment'] = sentiment['sentiment']
+            else:
+                review_detail['sentiment'] = 'neutral'
         return JsonResponse({"status": 200, "reviews": reviews})
     return JsonResponse({"status": 400, "message": "Dealer id is required."})
 
