@@ -7,14 +7,13 @@ import review_icon from "../assets/reviewicon.png"
 
 const Dealers = () => {
   const [dealersList, setDealersList] = useState([]);
-  // let [state, setState] = useState("")
   let [states, setStates] = useState([])
+  const [searchQuery, setSearchQuery] = useState('');
+  const [originalDealers, setOriginalDealers] = useState([]);
 
-  // let root_url = window.location.origin
   let dealer_url ="/djangoapp/get_dealers";
-  
   let dealer_url_by_state = "/djangoapp/get_dealers/";
- 
+
   const filterDealers = async (state) => {
     dealer_url_by_state = "/djangoapp/get_dealers/"+state;
     const res = await fetch(dealer_url_by_state, {
@@ -27,6 +26,21 @@ const Dealers = () => {
     }
   }
 
+  const handleInputChange = (event) => {
+    const query = event.target.value;
+    setSearchQuery(query);
+    const filtered = originalDealers.filter(dealer =>
+      dealer.state.toLowerCase().includes(query.toLowerCase())
+    );
+    setDealersList(filtered);
+  };
+
+  const handleLostFocus = () => {
+    if (!searchQuery) {
+      setDealersList(originalDealers);
+    }
+  };
+
   const get_dealers = async ()=>{
     const res = await fetch(dealer_url, {
       method: "GET"
@@ -38,60 +52,56 @@ const Dealers = () => {
       all_dealers.forEach((dealer)=>{
         states.push(dealer.state)
       });
-
       setStates(Array.from(new Set(states)))
       setDealersList(all_dealers)
+      setOriginalDealers(all_dealers)
     }
   }
   useEffect(() => {
     get_dealers();
-  },[]);  
+  },[]);
 
-
-let isLoggedIn = sessionStorage.getItem("username") != null ? true : false;
-return(
-  <div>
+  let isLoggedIn = sessionStorage.getItem("username") != null ? true : false;
+  return(
+    <div>
       <Header/>
-
-     <table className='table'>
-      <tr>
-      <th>ID</th>
-      <th>Dealer Name</th>
-      <th>City</th>
-      <th>Address</th>
-      <th>Zip</th>
-      <th>
-      <select name="state" id="state" onChange={(e) => filterDealers(e.target.value)}>
-      <option value="" selected disabled hidden>State</option>
-      <option value="All">All States</option>
-      {states.map(state => (
-          <option value={state}>{state}</option>
-      ))}
-      </select>        
-
-      </th>
-      {isLoggedIn ? (
-          <th>Review Dealer</th>
-         ):<></>
-      }
-      </tr>
-     {dealersList.map(dealer => (
+      <table className='table'>
         <tr>
-          <td>{dealer['id']}</td>
-          <td><Link to={`/dealer/${dealer['id']}`}>{dealer['full_name']}</Link></td>
-          <td>{dealer['city']}</td>
-          <td>{dealer['address']}</td>
-          <td>{dealer['zip']}</td>
-          <td>{dealer['state']}</td>
+          <th>ID</th>
+          <th>Dealer Name</th>
+          <th>City</th>
+          <th>Address</th>
+          <th>Zip</th>
+          <th>
+            <input
+              type="text"
+              placeholder="Search states..."
+              onChange={handleInputChange}
+              onBlur={handleLostFocus}
+              value={searchQuery}
+              style={{width: '120px'}}
+            />
+          </th>
           {isLoggedIn ? (
-            <td><Link to={`/postreview/${dealer['id']}`}><img src={review_icon} className="review_icon" alt="Post Review"/></Link></td>
-           ):<></>
-          }
+            <th>Review Dealer</th>
+          ):<></>}
         </tr>
-      ))}
-     </table>;
-  </div>
-)
+        {dealersList.map(dealer => (
+          <tr>
+            <td>{dealer['id']}</td>
+            <td><Link to={`/dealer/${dealer['id']}`}>{dealer['full_name']}</Link></td>
+            <td>{dealer['city']}</td>
+            <td>{dealer['address']}</td>
+            <td>{dealer['zip']}</td>
+            <td>{dealer['state']}</td>
+            {isLoggedIn ? (
+              <td><Link to={`/postreview/${dealer['id']}`}><img src={review_icon} className="review_icon" alt="Post Review"/></Link></td>
+            ):<></>}
+          </tr>
+        ))}
+      </table>
+    </div>
+  )
 }
 
 export default Dealers
