@@ -146,7 +146,7 @@ xrwvm-fullstack_developer_capstone/
    ```bash
    cd server/carsInventory
    npm install
-   node app.js
+   node run build
    ```
 
 5. **Setup Sentiment Analysis Microservice**
@@ -160,14 +160,14 @@ xrwvm-fullstack_developer_capstone/
    ```bash
    cd server/frontend
    npm install
-   npm start
+   npm run build
    ```
 
 7. **Setup Database Service**
    ```bash
    cd server/database
    npm install
-   node app.js
+   node run build
    ```
 
 ## 🌐 API Endpoints
