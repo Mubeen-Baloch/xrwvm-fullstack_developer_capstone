@@ -13,7 +13,8 @@ urlpatterns = [
     
     # Car pages
     path('get_cars', views.get_cars, name='get_cars'),
-    
+    #inventory pages
+    path(route='get_inventory/<int:dealer_id>', view=views.get_inventory, name='get_inventory'),
     # Dealer pages
     path('get_dealers', views.get_dealerships, name='get_dealers'),
     path('get_dealers/<str:state>', views.get_dealerships, name='get_dealers_by_state'),
